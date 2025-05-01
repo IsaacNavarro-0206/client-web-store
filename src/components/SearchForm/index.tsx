@@ -1,18 +1,18 @@
 import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
 const SearchForm = () => {
   const [query, setQuery] = useState("");
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (query.trim()) {
-      // navigate(`/items?search=${encodeURIComponent(query.trim())}`);
+      navigate(`/items?search=${encodeURIComponent(query.trim())}`);
     }
   };
 
