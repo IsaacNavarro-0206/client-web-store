@@ -15,10 +15,6 @@ const Home = () => {
       <div className="w-full max-w-xl">
         <SearchForm />
       </div>
-
-      <div className="w-full">
-        <h2 className="text-2xl font-semibold mb-6">Productos destacados</h2>
-      </div>
     </div>
   );
 };
