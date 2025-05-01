@@ -1,6 +1,5 @@
 import SearchForm from "@/components/SearchForm/index";
 
-
 const Home = () => {
   return (
     <div className="flex flex-col items-center justify-center space-y-12 py-8">
