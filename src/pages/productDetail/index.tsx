@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart, ArrowLeft } from "lucide-react";
 import { getItem, Item } from "@/service/items";
-import { Link, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const ProductDetail = () => {
@@ -18,6 +18,7 @@ const ProductDetail = () => {
     stock: 0,
   });
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getItemById = async () => {
@@ -32,13 +33,14 @@ const ProductDetail = () => {
 
   return (
     <div className="max-w-7xl mx-auto min-h-screen p-4 md:p-8 w-full">
-      <Link
-        to="/items"
-        className="inline-flex items-center text-sm mb-6 hover:underline"
+      <Button
+        variant="link"
+        onClick={() => navigate(-1)}
+        className="inline-flex items-center text-sm mb-6 hover:underline p-0 h-auto cursor-pointer"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Volver a resultados
-      </Link>
+      </Button>
 
       <div className="grid md:grid-cols-2 gap-8">
         <div className="space-y-4">
