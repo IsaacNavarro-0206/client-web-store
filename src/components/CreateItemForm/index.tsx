@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createItem } from "@/service/items"; // Importar createItem
+import { useNavigate } from "react-router-dom";
 
 const formSchema = yup.object().shape({
   title: yup
@@ -45,6 +47,7 @@ const formSchema = yup.object().shape({
 type FormData = yup.InferType<typeof formSchema>;
 
 export default function CreateItemForm() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -81,29 +84,20 @@ export default function CreateItemForm() {
     setIsLoading(true);
 
     try {
-      if (!import.meta.env.VITE_API_URL) {
-        toast.error("Error de configuración", {
-          description: "Configura la URL de la API en las variables de entorno",
-        });
-        return;
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/create`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
-      );
-
-      if (!response.ok) throw new Error("Error en la creación");
+       
+      await createItem({
+        ...data,
+        _id: "",
+        rating: 0,
+      });
 
       toast.success("Producto creado", {
         description: "El producto se ha creado exitosamente",
       });
 
       reset();
+
+      navigate("/");
     } catch (error) {
       console.log(error);
 
