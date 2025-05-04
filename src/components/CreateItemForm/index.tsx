@@ -19,6 +19,9 @@ import {
 import { createItem } from "@/service/items"; // Importar createItem
 import { useNavigate } from "react-router-dom";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 const formSchema = yup.object().shape({
   title: yup
     .string()
@@ -30,6 +33,7 @@ const formSchema = yup.object().shape({
     .required("Campo requerido"),
   price: yup
     .number()
+    .typeError("El precio debe ser un número.")
     .positive("El precio debe ser un número positivo.")
     .required("Campo requerido"),
   brand: yup
@@ -39,9 +43,26 @@ const formSchema = yup.object().shape({
   category: yup.string().required("Selecciona una categoría."),
   stock: yup
     .number()
+    .typeError("El stock debe ser un número.")
     .integer("El stock debe ser un número entero.")
-    .positive("El stock debe ser positivo.")
+    .min(0, "El stock no puede ser negativo.")
     .required("Campo requerido"),
+  images: yup
+    .mixed()
+    .test(
+      "fileCount",
+      "Puedes subir un máximo de 5 imágenes.",
+      (files) => (files as FileList)?.length <= 5
+    )
+    .test("fileType", "Solo se permiten archivos JPG, PNG y WEBP.", (files) =>
+      Array.from(files as FileList).every((file) =>
+        ALLOWED_FILE_TYPES.includes(file.type)
+      )
+    )
+    .test("fileSize", "Cada archivo debe pesar menos de 5MB.", (files) =>
+      Array.from(files as FileList).every((file) => file.size <= MAX_FILE_SIZE)
+    )
+    .required("Debes subir al menos una imagen."),
 });
 
 type FormData = yup.InferType<typeof formSchema>;
@@ -49,6 +70,7 @@ type FormData = yup.InferType<typeof formSchema>;
 export default function CreateItemForm() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const {
     register,
@@ -57,6 +79,7 @@ export default function CreateItemForm() {
     reset,
     watch,
     setValue,
+    trigger,
   } = useForm<FormData>({
     resolver: yupResolver(formSchema),
     defaultValues: {
@@ -83,29 +106,57 @@ export default function CreateItemForm() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
 
-    try {
-       
-      await createItem({
-        ...data,
-        _id: "",
-        rating: 0,
-      });
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("price", data.price.toString());
+    formData.append("brand", data.brand);
+    formData.append("category", data.category);
+    formData.append("stock", data.stock.toString());
 
-      toast.success("Producto creado", {
-        description: "El producto se ha creado exitosamente",
+    if (data.images) {
+      Array.from(data.images as FileList).forEach((file) => {
+        formData.append(`images`, file);
+      });
+    }
+
+    try {
+      await createItem(formData);
+
+      toast.success("Item creado", {
+        description: "El item se ha creado exitosamente",
       });
 
       reset();
-
+      setImagePreviews([]);
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.error("Error creando el item:", error);
 
-      toast.error("Error al crear producto", {
-        description: "Por favor intenta nuevamente",
+      const errorMessage =
+        error instanceof Error ? error.message : "Por favor intenta nuevamente";
+      toast.error("Error al crear item", {
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      setValue("images", files);
+      trigger("images");
+
+      const previews = Array.from(files).map((file) =>
+        URL.createObjectURL(file)
+      );
+      setImagePreviews(previews);
+    } else {
+      setValue("images", new DataTransfer().files);
+      trigger("images");
+      setImagePreviews([]);
     }
   };
 
@@ -114,7 +165,7 @@ export default function CreateItemForm() {
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="text-3xl text-center">
-            Crear nuevo producto
+            Crear nuevo item
           </CardTitle>
         </CardHeader>
 
@@ -124,7 +175,7 @@ export default function CreateItemForm() {
               <Label htmlFor="title">Título</Label>
               <Input
                 id="title"
-                placeholder="Nombre del producto"
+                placeholder="Nombre del item"
                 {...register("title")}
               />
 
@@ -155,19 +206,22 @@ export default function CreateItemForm() {
               <div className="space-y-1.5">
                 <Label htmlFor="price">Precio</Label>
                 <Input id="price" type="number" {...register("price")} />
+
                 {errors.price && (
                   <p className="text-sm text-red-500 mt-1">
                     {errors.price.message}
                   </p>
                 )}
               </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="brand">Marca</Label>
                 <Input
                   id="brand"
-                  placeholder="Marca del producto"
+                  placeholder="Marca del item"
                   {...register("brand")}
                 />
+
                 {errors.brand && (
                   <p className="text-sm text-red-500 mt-1">
                     {errors.brand.message}
@@ -217,6 +271,39 @@ export default function CreateItemForm() {
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <Label htmlFor="images">
+                Imágenes (máx. 5, hasta 5MB cada una)
+              </Label>
+              <Input
+                id="images"
+                type="file"
+                multiple
+                accept={ALLOWED_FILE_TYPES.join(",")} // Establecer tipos aceptados
+                onChange={handleImageChange}
+              />
+
+              {errors.images && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.images.message}
+                </p>
+              )}
+
+              {imagePreviews.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                  {imagePreviews.map((src, index) => (
+                    <img
+                      key={index}
+                      src={src}
+                      alt={`Preview ${index + 1}`}
+                      className="h-20 w-20 object-cover rounded border"
+                      onLoad={() => URL.revokeObjectURL(src)} // Limpiar URLs de objeto
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
@@ -224,7 +311,7 @@ export default function CreateItemForm() {
                   Creando...
                 </>
               ) : (
-                "Crear producto"
+                "Crear item"
               )}
             </Button>
           </form>

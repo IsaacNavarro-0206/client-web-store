@@ -3,18 +3,10 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import StarRating from "../StarRating";
 import { Link } from "react-router-dom";
-
-interface Product {
-  _id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  rating: number;
-}
+import { Item } from "@/service/items";
 
 interface ProductCardProps {
-  product: Product;
+  product: Item;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
@@ -23,7 +15,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <Link to={`/items/${product._id}`} className="overflow-hidden">
         <div className="aspect-square relative overflow-hidden">
           <img
-            src="/placeholder.svg"
+            src={product.images[0]}
             alt={product.title}
             className="object-cover w-full h-full transition-transform hover:scale-105"
           />

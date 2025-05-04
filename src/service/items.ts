@@ -9,6 +9,7 @@ export interface Item {
   brand: string;
   stock: number;
   rating: number;
+  images: string[];
 }
 
 export const searchItems = (query: string) => {
@@ -33,13 +34,14 @@ export const getItem = (id: string) => {
   });
 };
 
-export const createItem = (data: Item) => {
+export const createItem = (data: FormData) => {
   return axios({
     method: "POST",
     baseURL: import.meta.env.VITE_API_URL,
     url: "/create",
     headers: {
-      "Content-Type": "application/json",
+      // Establecer Content-Type a multipart/form-data para la carga de archivos
+      "Content-Type": "multipart/form-data",
     },
     data,
   });
