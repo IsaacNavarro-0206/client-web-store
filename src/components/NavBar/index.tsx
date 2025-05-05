@@ -23,7 +23,7 @@ const NavBar = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b  bg-white">
-      <div className="container flex h-16 items-center">
+      <div className="flex h-16 items-center px-5">
         <div className="mr-4 flex">
           <Link
             to="/"
@@ -51,12 +51,12 @@ const NavBar = () => {
               </Link>
             ))}
           </nav>
+
           <div className="flex items-center space-x-4">
             <Button variant="outline" size="icon" className="relative">
               <ShoppingBag className="h-5 w-5" />
             </Button>
-          </div>{" "}
-          *
+          </div>
         </div>
 
         <div className="flex flex-1 items-center justify-end md:hidden">
