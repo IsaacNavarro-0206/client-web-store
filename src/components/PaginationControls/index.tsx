@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationControlsProps {
   currentPage: number;
@@ -63,23 +64,23 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
         <span className="text-sm text-muted-foreground">
           Página {currentPage} de {totalPages}
         </span>
-        
+
         <Button
           variant="outline"
           size="sm"
           onClick={handlePrevious}
           disabled={currentPage <= 1}
         >
-          Anterior
+          <ChevronLeft />
         </Button>
-        
+
         <Button
           variant="outline"
           size="sm"
           onClick={handleNext}
           disabled={currentPage >= totalPages}
         >
-          Siguiente
+          <ChevronRight />
         </Button>
       </div>
     </div>

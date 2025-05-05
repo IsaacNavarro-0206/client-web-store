@@ -11,7 +11,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   return (
-    <Card className="overflow-hidden h-3/4 flex flex-col hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden min-h-screen h-3/4 flex flex-col hover:shadow-md transition-shadow">
       <Link to={`/items/${product._id}`} className="overflow-hidden">
         <div className="aspect-square relative overflow-hidden">
           <img
