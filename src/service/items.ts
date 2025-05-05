@@ -12,11 +12,22 @@ export interface Item {
   images: string[];
 }
 
-export const searchItems = (query: string) => {
+export interface SearchResults {
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  results: Item[];
+}
+
+export const searchItems = (
+  query: string,
+  page: number = 1,
+  limit: number = 10
+) => {
   return axios({
     method: "GET",
     baseURL: import.meta.env.VITE_API_URL,
-    url: `/items?search=${query}`,
+    url: `/items?search=${query}&page=${page}&limit=${limit}`,
     headers: {
       "Content-Type": "application/json",
     },
